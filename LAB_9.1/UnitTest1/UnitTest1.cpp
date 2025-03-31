@@ -9,49 +9,36 @@ namespace UnitTest1
     TEST_CLASS(StudentUnitTests)
     {
    public:
-        TEST_METHOD(TestCreateStudent)
+        TEST_METHOD(TestStudentAverage)
         {
-            Student s;
-            s.surname = "TestName";
-            s.course = 2;
-            s.specialty = "Math";
-            s.o.physics = 4.5;
-            s.o.math = 3.7;
-            s.o.informatics = 5.0;
-
-            Assert::AreEqual(string("TestName"), s.surname);
-            Assert::AreEqual(2, s.course);
-            Assert::AreEqual(string("Math"), s.specialty);
-            Assert::AreEqual(4.5, s.o.physics);
-            Assert::AreEqual(3.7, s.o.math);
-            Assert::AreEqual(5.0, s.o.informatics);
+            Student s = { "Doe", 2, "Computer Science", 5.0, 4.0, 3.0 };
+            double avg = studentAverage(s);
+            Assert::AreEqual(4.0, avg, 0.001, L"Average grade should be 4.0");
         }
 
-        TEST_METHOD(TestCountHighGradeStudents)
+        TEST_METHOD(TestCountHighAverage)
         {
             Student students[3] = {
-                {"Alice", 1, "CS", {5.0, 4.8, 4.7}},
-                {"Bob", 2, "Math", {3.5, 3.2, 4.0}},
-                {"Charlie", 3, "Physics", {4.9, 4.6, 4.8}}
+                { "Doe", 2, "CS", 5.0, 4.0, 3.0 },
+                { "Smith", 3, "Math", 5.0, 5.0, 5.0 },
+                { "Brown", 1, "Physics", 4.0, 4.0, 4.0 }
             };
-
-            double result = CountHighGradeStudents(students, 3);
-            Assert::AreEqual(66.67, result, 0.01);
+            int count = countHighAverage(students, 3, 4.5);
+            Assert::AreEqual(1, count, L"Only one student has an average > 4.5");
         }
 
-        TEST_METHOD(TestSortStudentsByCourse)
+        TEST_METHOD(TestSubjectAverages)
         {
             Student students[3] = {
-                {"Alice", 3, "CS", {5.0, 4.8, 4.7}},
-                {"Bob", 1, "Math", {3.5, 3.2, 4.0}},
-                {"Charlie", 2, "Physics", {4.9, 4.6, 4.8}}
+                { "Doe", 2, "CS", 5.0, 4.0, 3.0 },
+                { "Smith", 3, "Math", 5.0, 5.0, 5.0 },
+                { "Brown", 1, "Physics", 4.0, 4.0, 4.0 }
             };
-
-            Sort(students, 3);
-
-            Assert::AreEqual(1, students[0].course);
-            Assert::AreEqual(2, students[1].course);
-            Assert::AreEqual(3, students[2].course);
+            double avgPhysics, avgMath, avgInformatics;
+            computeSubjectAverages(students, 3, avgPhysics, avgMath, avgInformatics);
+            Assert::AreEqual((5.0 + 5.0 + 4.0) / 3.0, avgPhysics, 0.001, L"Incorrect average for Physics");
+            Assert::AreEqual((4.0 + 5.0 + 4.0) / 3.0, avgMath, 0.001, L"Incorrect average for Math");
+            Assert::AreEqual((3.0 + 5.0 + 4.0) / 3.0, avgInformatics, 0.001, L"Incorrect average for Informatics");
         }
     };
 }
