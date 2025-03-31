@@ -1,122 +1,152 @@
 #include <iostream>
 #include <iomanip>
 #include <string>
+#include <limits>
 using namespace std;
 
 struct Student {
     string surname;
     int course;
     string specialty;
-
-    union {
-        struct
-        {
-            double physics;
-            double math;
-            double informatics;
-        };
-    } o;
+    double physics;
+    double math;
+    double informatics;
 };
-void Create(Student* s, int N) {
+
+void inputStudents(Student* s, const int N) {
     for (int i = 0; i < N; i++) {
         cout << "Student #" << i + 1 << ":" << endl;
         cout << " Surname: ";
-        cin >> s[i].surname;
+        getline(cin, s[i].surname);
         cout << " Course: ";
         cin >> s[i].course;
+        cin.ignore();
         cout << " Specialty: ";
-        cin >> s[i].specialty;
+        getline(cin, s[i].specialty);
         cout << " Physics grade: ";
-        cin >> s[i].o.physics;
+        cin >> s[i].physics;
         cout << " Math grade: ";
-        cin >> s[i].o.math;
+        cin >> s[i].math;
         cout << " Informatics grade: ";
-        cin >> s[i].o.informatics;
+        cin >> s[i].informatics;
+        cin.ignore();
+        cout << endl;
     }
 }
 
-void Print(Student* s, int N) {
+void printStudents(Student* s, const int N) {
     cout << "======================================================================================" << endl;
     cout << "| No. | Surname        | Course | Specialty          | Physics |  Math | Informatics |" << endl;
     cout << "--------------------------------------------------------------------------------------" << endl;
-
     for (int i = 0; i < N; i++) {
         cout << "| " << setw(2) << right << i + 1 << "  ";
         cout << "| " << setw(13) << left << s[i].surname;
         cout << "  | " << setw(6) << right << s[i].course;
         cout << " | " << setw(18) << left << s[i].specialty;
-        cout << " | " << setw(7) << right << fixed << setprecision(2) << s[i].o.physics;
-        cout << " | " << setw(5) << right << fixed << setprecision(2) << s[i].o.math;
-        cout << " | " << setw(10) << right << fixed << setprecision(2) << s[i].o.informatics;
+        cout << " | " << setw(7) << right << fixed << setprecision(2) << s[i].physics;
+        cout << " | " << setw(5) << right << fixed << setprecision(2) << s[i].math;
+        cout << " | " << setw(10) << right << fixed << setprecision(2) << s[i].informatics;
         cout << "  |" << endl;
     }
-
     cout << "======================================================================================" << endl;
 }
 
-double CountHighGradeStudents(Student* s, int N) {
+double studentAverage(const Student& s) {
+    return (s.physics + s.math + s.informatics) / 3.0;
+}
+
+int countHighAverage(Student* s, const int N, double threshold = 4.5) {
     int count = 0;
     for (int i = 0; i < N; i++) {
-        double avg = (s[i].o.physics + s[i].o.math + s[i].o.informatics) / 3;
-        if (avg > 4.5) count++;
-    }
-    return (double(count) / N) * 100;  
-}
-
-void Sort(Student* s, int N) {
-    for (int i = 0; i < N - 1; i++) {
-        for (int j = 0; j < N - i - 1; j++) {
-            if (s[j].course > s[j + 1].course) {
-                swap(s[j], s[j + 1]);
-            }
+        if (studentAverage(s[i]) > threshold) {
+            count++;
         }
     }
-    cout << "Students sorted by course successfully!" << endl;
+    return count;
 }
 
+void computeSubjectAverages(Student* s, const int N,
+    double& avgPhysics, double& avgMath, double& avgInformatics) {
+    avgPhysics = avgMath = avgInformatics = 0.0;
+    for (int i = 0; i < N; i++) {
+        avgPhysics += s[i].physics;
+        avgMath += s[i].math;
+        avgInformatics += s[i].informatics;
+    }
+    avgPhysics /= N;
+    avgMath /= N;
+    avgInformatics /= N;
+}
+
+void subjectWithHighestAverage(double avgPhysics, double avgMath, double avgInformatics) {
+    string subject;
+    double maxAvg = avgPhysics;
+    subject = "Physics";
+    if (avgMath > maxAvg) {
+        maxAvg = avgMath;
+        subject = "Math";
+    }
+    if (avgInformatics > maxAvg) {
+        maxAvg = avgInformatics;
+        subject = "Informatics";
+    }
+    cout << "Subject with highest average grade: " << subject
+        << " (average: " << fixed << setprecision(2) << maxAvg << ")" << endl;
+}
 int main() {
     int N;
     cout << "Enter number of students: ";
     cin >> N;
+    cin.ignore();
 
-    Student* p = new Student[N];
     int menuItem;
-    double proc;
+    Student* s = new Student[N];
 
     do {
-        cout << endl << endl << endl;
-        cout << "================ MENU ==================" << endl;
+        cout << "\n\n================ MENU ==================" << endl;
         cout << "1 - Create students" << endl;
         cout << "2 - Print students" << endl;
-        cout << "3 - Count percentage of students with avg grade > 4.5" << endl;
-        cout << "4 - Sort students by course" << endl;
+        cout << "3 - Count number of students whose average grade is greater than 4.5" << endl;
+        cout << "4 - Subject with highest average grade" << endl;
         cout << "0 - Exit" << endl;
         cout << "========================================" << endl;
         cout << "Choose an option: ";
         cin >> menuItem;
+        cin.ignore();
 
         switch (menuItem) {
-        case 1:
-            Create(p, N);
+        case 1: {
+            inputStudents(s, N);
             break;
-        case 2:
-            Print(p, N);
+        }
+        case 2: {
+            printStudents(s, N);
             break;
-        case 3:
-            proc = CountHighGradeStudents(p, N);
-            cout << "Percentage of students with average grade > 4.5: " << proc << "%" << endl;
+        }
+        case 3: {
+            int highAvgCount = countHighAverage(s, N, 4.5);
+            cout << "Number of students whose average grade is greater than 4.5: " << highAvgCount << endl;
             break;
-        case 4:
-            Sort(p, N);
+        }
+        case 4: {
+            double avgPhysics, avgMath, avgInformatics;
+            computeSubjectAverages(s, N, avgPhysics, avgMath, avgInformatics);
+            cout << "Average grade in Physics: " << fixed << setprecision(2) << avgPhysics << endl;
+            cout << "Average grade in Math: " << fixed << setprecision(2) << avgMath << endl;
+            cout << "Average grade in Informatics: " << fixed << setprecision(2) << avgInformatics << endl;
+            subjectWithHighestAverage(avgPhysics, avgMath, avgInformatics);
             break;
+        }
         case 0:
-            cout << "Exiting program..." << endl;
+            cout << "Goodbye" << endl;
             break;
-        default:
+        default: {
             cout << "Invalid choice. Please enter a valid option." << endl;
+            break;
+        }
         }
     } while (menuItem != 0);
 
-    delete[] p;
+    delete[] s;
     return 0;
 }
